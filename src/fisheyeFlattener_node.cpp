@@ -57,7 +57,7 @@ void FisheyeFlattener::onInit()
     nh.param<std::string>("outputTopicPrefix", outputTopicPrefix, "flatImg");
 
     undistMaps = generateAllUndistMap(cam, cameraRotation, imgWidth, fov);
-    NODELET_INFO("Unsidtortion maps generated.");
+    NODELET_INFO("Undistortion maps generated.");
     for (int i = 0; i < undistMaps.size(); i++)
     {
         img_pub.push_back(nh.advertise<sensor_msgs::Image>(outputTopicPrefix + "_" + std::to_string(i), 3));

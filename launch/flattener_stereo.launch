@@ -1,0 +1,87 @@
+
+<launch>
+  <!-- Common parameters -->
+  <arg name="camera_name"               default="stereo" />
+
+  <!-- When unspecified, the driver will use the default framerate as given by the
+      camera itself. Use the parameter 'control_frame_rate' to enable manual frame 
+      rate control, and 'frame_rate' to set the frame rate value. -->
+  <arg name="control_frame_rate"        default="true" />
+  <arg name="frame_rate"                default="15" />
+
+  <arg name="left_camera_serial"        default="15085987" />
+  <arg name="left_camera_calibrated"    default="0" />
+
+  <arg name="right_camera_serial"       default="15085990" />
+  <arg name="right_camera_calibrated"   default="0" />
+
+  <arg name="run_stereo_image_proc"     default="false" />
+
+  <!-- Nodelet manager -->
+  <!-- Both cameras are not loaded into one nodelet manager to avoid the namespacing issue. -->
+  <group ns="$(arg camera_name)" >
+    <group ns="left" >
+      <node pkg="nodelet" type="nodelet" name="standalone_nodelet" args="manager" output="screen"/>
+      <!-- Camera nodelet -->
+      <node pkg="nodelet" type="nodelet" name="camera_nodelet"
+            args="load fisheye_flattener standalone_nodelet" output="screen">
+        
+        <param name="frame_id"                        value="camera_left" />
+        <param name="serial"                          value="$(arg left_camera_serial)" />
+
+        <param name="cam_file" type ="string" value="$(find fisheye_flattener)/config/CM3_fish_camera_calib_left.yaml"/>
+        <param name="inputTopic" type ="string" value="/stereo/left/image_raw"/>
+        <param name="outputTopicPrefix" type="string" value="flatImage"/>
+        <!-- rotationVector: addition rotational offset for remapping  -->
+        <param name="rotationVectorX" type="double" value="0"/> 
+        <param name="rotationVectorY" type="double" value="0"/> 
+        <param name="rotationVectorZ" type="double" value="0"/> 
+        <!-- FOV is in degree -->
+        <param name="fov" type="double" value="235"/> 
+        <!-- Image width for center reprojection -->
+        <param name="imgWidth" type="int" value="600"/> 
+      </node>
+
+      <!-- Debayering nodelet -->
+      <!-- <node pkg="nodelet" type="nodelet" name="image_proc_debayer"
+          args="load image_proc/debayer /camera_nodelet_manager">
+      </node> -->
+    </group>
+
+    <group ns="right" >
+      <node pkg="nodelet" type="nodelet" name="standalone_nodelet" args="manager" output="screen"/>
+      <!-- Camera nodelet -->
+      <node pkg="nodelet" type="nodelet" name="camera_nodelet"
+            args="load fisheye_flattener standalone_nodelet" output="screen">
+        <param name="frame_id"                        value="camera_right" />
+        <param name="serial"                          value="$(arg right_camera_serial)" />
+
+        <param name="cam_file" type ="string" value="$(find fisheye_flattener)/config/CM3_fish_camera_calib_right.yaml"/>
+        <param name="inputTopic" type ="string" value="/stereo/right/image_raw"/>
+        <param name="outputTopicPrefix" type="string" value="flatImage"/>
+        <!-- rotationVector: addition rotational offset for remapping  -->
+        <param name="rotationVectorX" type="double" value="0"/> 
+        <param name="rotationVectorY" type="double" value="0"/> 
+        <param name="rotationVectorZ" type="double" value="0"/> 
+        <!-- FOV is in degree -->
+        <param name="fov" type="double" value="235"/> 
+        <!-- Image width for center reprojection -->
+        <param name="imgWidth" type="int" value="600"/> 
+
+      </node>
+
+      <!-- Debayering nodelet -->
+      <!-- <node pkg="nodelet" type="nodelet" name="image_proc_debayer"
+          args="load image_proc/debayer /camera_nodelet_manager">
+      </node> -->
+    </group>
+
+    <!-- Stereo image processing nodelet -->
+    <!-- <group if="$(arg run_stereo_image_proc)" >
+      <node pkg="stereo_image_proc" type="stereo_image_proc" name="stereo_image_proc">
+        <param name="approximate_sync" value="true"/>
+      </node>
+    </group> -->
+
+  </group>
+</launch>

@@ -119,7 +119,6 @@ target_link_libraries(${PROJECT_NAME}_nodelet ${catkin_LIBRARIES}
 ${Boost_LIBRARIES}
 ${OpenCV_LIBS}
 ${CERES_LIBRARIES}
-camera_model
 stdc++fs)
 
 
